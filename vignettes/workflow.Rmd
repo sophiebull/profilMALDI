@@ -1,0 +1,52 @@
+---
+title: "Untitled"
+author: "Sophie Castel"
+date: "4/6/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Read .txt File
+
+```{r}
+data <- read_profilm(file = "/home/sophie/profilMALDI/data/test.txt")
+data
+```
+
+## Change resolution 
+
+```{r}
+data <- change_res(data, xres = 3000, yres = 3000) # maintain aspect ratio, cut off edges.. need to figure this out
+```
+
+## Plot profile
+```{r}
+plot_profilm(z = data$surface, palette = "Picnic")
+
+```
+
+### Example using volcano data
+```{r}
+data(volcano)
+z <- volcano
+
+plot_profilm(z = volcano, palette = "Blackbody")
+
+```
+
+
+
+## Test
+```{r}
+data(volcano)
+test_data <- list()
+test_data$surface <- volcano[20:45, 10:50]
+
+resized <- change_res(test_data, xres = 150, yres = 200)
+
+```
+
+
