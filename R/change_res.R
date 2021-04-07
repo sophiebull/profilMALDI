@@ -121,13 +121,10 @@ change_res <- function(data, xres = ncol(data$surface), yres = nrow(data$surface
   resized <- ResizeMat(mat = data$surface, ndim = c(yres, xres) )
 
   
-  # Output side-by-side plot of changes
+  ####################
+  # PLOT SIDE-BY-SIDE
+  ####################
 
-  #col_orig <- colour_values(data$surface, palette = "viridis")
-  #col_orig <- matrix(col_orig, ncol = xres_orig, nrow = yres_orig)
-  
-  #col_resized <- colour_values(resized, palette = "viridis")
-  #col_resized <- matrix(col_resized, ncol = xres, nrow = yres)
   
   data_orig <- melt(data$surface)
   data_resized <- melt(resized)
