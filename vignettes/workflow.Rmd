@@ -19,68 +19,26 @@ data
 ## Change resolution 
 
 ```{r}
-data <- change_res(data, xres = 3000, yres = 3000) # maintain aspect ratio, cut off edges.. need to figure this out
-```
-
-## Plot profile
-```{r}
-plot_profilm(z = data$surface, palette = "Picnic")
-
+data_resized <- change_res(data, xres = 120, yres = 100)
 ```
 
 ### Example using volcano data
+
 ```{r}
+
 data(volcano)
 z <- volcano
 
-plot_profilm(z = volcano, palette = "Blackbody")
-
-```
-
-
-
-## Test
-```{r}
-data(volcano)
-test_data <- list()
-test_data$surface <- volcano[20:45, 10:50]
-
-resized <- change_res(test_data, xres = 150, yres = 200)
-
-```
-
-# Contours sandbox
-```{r}
-test_data <- melt(volcano[10:15, 10:50])
-names(test_data) <- c("row_id", "col_id", "value")
-  
-p_orig <- ggplot(test_data, aes(x = col_id, y = row_id, z = value, fill = value, label = value)) + 
-            geom_tile() + 
-            #geom_text(col = "black") + 
-            scale_fill_gradientn(colors = c("white","red"), values = c(0,1)) + 
-            scale_y_continuous(trans = "reverse") + 
-            theme(legend.position = "none",
-                  axis.title.x = element_blank(),
-                  axis.title.y = element_blank(),
-                  axis.text.x = element_blank(),
-                  axis.text.y = element_blank()) + 
-            ggtitle(paste0("original (", xres_orig, " x ", yres_orig, ")")) + 
-  geom_contour(aes(x = col_id, y = row_id, z = value), bins = 10)
-
-p_orig
-```
-
-
-
-# Testing plot fucntion
-
-```{r}
 data <- list()
 data$surface <- volcano
 
 
+z_resized <- change_res(data, xres = 60, yres = 80)
 
-plot_profilm(data = data, palette = 'inferno', threeD = TRUE, tolerance = 10, contour_col = "white")
+data_resized <- list()
+data_resized$surface <- z_resized
+
+plot_profilm(data = data_resized, palette = 'inferno', threeD = FALSE, tolerance = 20, contour_col = "white")
 ```
 
 
