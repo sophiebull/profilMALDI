@@ -5,6 +5,7 @@
 ##' @param data matrix; The matrix containing the topological data
 ##' @param xres numeric; A positive integer value representing the resolution across the x-axis.
 ##' @param yres numeric; A positive integer value representing the resolution across the y-axis.
+##' @param display logical; TRUE = Display side-by-side tile plots of original and resized data.
 ##' 
 ##' @return Returns the resized matrix of data and displays side-by-side plots visualizing the adjusted resolution.
 ##'
@@ -19,7 +20,7 @@
 
 # -----------------------------------------------------------------------
 
-change_res <- function(data, xres = ncol(data$surface), yres = nrow(data$surface)){
+change_res <- function(data, xres = ncol(data$surface), yres = nrow(data$surface), display = FALSE){
   
   ##################
   # LOGICAL CHECKS
@@ -125,38 +126,39 @@ change_res <- function(data, xres = ncol(data$surface), yres = nrow(data$surface
   # PLOT SIDE-BY-SIDE
   ####################
 
-  
-  data_orig <- melt(data$surface)
-  data_resized <- melt(resized)
-  
-  names(data_orig) <- c("row_id", "col_id", "value")
-  names(data_resized) <- c("row_id", "col_id", "value")
-  
-  p_orig <- ggplot(data_orig, aes(x = col_id, y = row_id, z = value, fill = value, label = value)) + 
-    geom_tile() + 
-    #geom_text(col = "black") + 
-    scale_fill_gradientn(colors = c("white","red"), values = c(0,1)) + 
-    scale_y_continuous(trans = "reverse") + 
-    theme(legend.position = "none",
-          axis.title.x = element_blank(),
-          axis.title.y = element_blank(),
-          axis.text.x = element_blank(),
-          axis.text.y = element_blank()) + 
-    ggtitle(paste0("original (", xres_orig, " x ", yres_orig, ")")) 
-  
-  p_resized <- ggplot(data_resized, aes(x = col_id, y = row_id, z = value, fill = value, label = value)) + 
-    geom_tile() + 
-    #geom_text(col = "black") + 
-    scale_fill_gradientn(colors = c("white","red"), values = c(0,1)) + 
-    scale_y_continuous(trans = "reverse")+ 
-    theme(legend.position = "none",
-          axis.title.x = element_blank(),
-          axis.title.y = element_blank(),
-          axis.text.x = element_blank(),
-          axis.text.y = element_blank()) + 
-    ggtitle(paste0("resized (", xres, " x ", yres, ")")) 
-  
-  grid.arrange(p_orig, p_resized, ncol = 2)
+  if(display){
+    data_orig <- melt(data$surface)
+    data_resized <- melt(resized)
+    
+    names(data_orig) <- c("row_id", "col_id", "value")
+    names(data_resized) <- c("row_id", "col_id", "value")
+    
+    p_orig <- ggplot(data_orig, aes(x = col_id, y = row_id, z = value, fill = value, label = value)) + 
+      geom_tile() + 
+      #geom_text(col = "black") + 
+      scale_fill_gradientn(colors = c("white","red"), values = c(0,1)) + 
+      scale_y_continuous(trans = "reverse") + 
+      theme(legend.position = "none",
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank()) + 
+      ggtitle(paste0("original (", xres_orig, " x ", yres_orig, ")")) 
+    
+    p_resized <- ggplot(data_resized, aes(x = col_id, y = row_id, z = value, fill = value, label = value)) + 
+      geom_tile() + 
+      #geom_text(col = "black") + 
+      scale_fill_gradientn(colors = c("white","red"), values = c(0,1)) + 
+      scale_y_continuous(trans = "reverse")+ 
+      theme(legend.position = "none",
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank()) + 
+      ggtitle(paste0("resized (", xres, " x ", yres, ")")) 
+    
+    grid.arrange(p_orig, p_resized, ncol = 2)
+  }
   
   r_data <- list()
   r_data$resized <- resized
