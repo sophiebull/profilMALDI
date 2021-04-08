@@ -6,16 +6,16 @@
 ##' @param xres numeric; A positive integer value representing the resolution across the x-axis.
 ##' @param yres numeric; A positive integer value representing the resolution across the y-axis.
 ##' 
-##' @return Returns a list of 1. An array of values representing surface topography (heights) and 2. The pixel size (um). 
+##' @return Returns the resized matrix of data and displays side-by-side plots visualizing the adjusted resolution.
 ##'
 ##' @author Sophie Castel <sophie.castel@@ontariotechu.net>
 ##' @references https://github.com/castels/profilMALDI
 ##' @keywords data txt convert read
 
 # -----------------------------------------------------------------------
-# Last Updated: April 6, 2021
+# Last Updated: April 7, 2021
 # Author: Sophie Castel
-# Title: profilMALDI: Match resolution of Profilometry data to MALDI MSI data
+# Title: profilMALDI: Resize Profilometry Data
 
 # -----------------------------------------------------------------------
 
@@ -132,7 +132,7 @@ change_res <- function(data, xres = ncol(data$surface), yres = nrow(data$surface
   names(data_orig) <- c("row_id", "col_id", "value")
   names(data_resized) <- c("row_id", "col_id", "value")
   
-  p_orig <- ggplot(data_orig, aes(x = col_id, y = row_id, fill = value, label = value)) + 
+  p_orig <- ggplot(data_orig, aes(x = col_id, y = row_id, z = value, fill = value, label = value)) + 
     geom_tile() + 
     #geom_text(col = "black") + 
     scale_fill_gradientn(colors = c("white","red"), values = c(0,1)) + 
@@ -142,9 +142,9 @@ change_res <- function(data, xres = ncol(data$surface), yres = nrow(data$surface
           axis.title.y = element_blank(),
           axis.text.x = element_blank(),
           axis.text.y = element_blank()) + 
-    ggtitle(paste0("original (", xres_orig, " x ", yres_orig, ")"))
+    ggtitle(paste0("original (", xres_orig, " x ", yres_orig, ")")) 
   
-  p_resized <- ggplot(data_resized, aes(x = col_id, y = row_id, fill = value, label = value)) + 
+  p_resized <- ggplot(data_resized, aes(x = col_id, y = row_id, z = value, fill = value, label = value)) + 
     geom_tile() + 
     #geom_text(col = "black") + 
     scale_fill_gradientn(colors = c("white","red"), values = c(0,1)) + 
@@ -154,7 +154,7 @@ change_res <- function(data, xres = ncol(data$surface), yres = nrow(data$surface
           axis.title.y = element_blank(),
           axis.text.x = element_blank(),
           axis.text.y = element_blank()) + 
-    ggtitle(paste0("resized (", xres, " x ", yres, ")"))
+    ggtitle(paste0("resized (", xres, " x ", yres, ")")) 
   
   grid.arrange(p_orig, p_resized, ncol = 2)
   
