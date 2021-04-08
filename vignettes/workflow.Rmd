@@ -49,4 +49,38 @@ resized <- change_res(test_data, xres = 150, yres = 200)
 
 ```
 
+# Contours sandbox
+```{r}
+test_data <- melt(volcano[10:15, 10:50])
+names(test_data) <- c("row_id", "col_id", "value")
+  
+p_orig <- ggplot(test_data, aes(x = col_id, y = row_id, z = value, fill = value, label = value)) + 
+            geom_tile() + 
+            #geom_text(col = "black") + 
+            scale_fill_gradientn(colors = c("white","red"), values = c(0,1)) + 
+            scale_y_continuous(trans = "reverse") + 
+            theme(legend.position = "none",
+                  axis.title.x = element_blank(),
+                  axis.title.y = element_blank(),
+                  axis.text.x = element_blank(),
+                  axis.text.y = element_blank()) + 
+            ggtitle(paste0("original (", xres_orig, " x ", yres_orig, ")")) + 
+  geom_contour(aes(x = col_id, y = row_id, z = value), bins = 10)
+
+p_orig
+```
+
+
+
+# Testing plot fucntion
+
+```{r}
+data <- list()
+data$surface <- volcano
+
+
+
+plot_profilm(data = data, palette = 'inferno', threeD = TRUE, tolerance = 10, contour_col = "white")
+```
+
 
