@@ -42,3 +42,30 @@ plot_profilm(data = data_resized, palette = 'inferno', threeD = FALSE, tolerance
 ```
 
 
+### Try rotating data
+```{r}
+original_dat <- list()
+original_dat$surface <- volcano
+
+rot_dat <- list()
+rot_dat$surface <- rotate.matrix(x = volcano, angle = 8, method = "bilinear")
+
+rotrot_dat <- list()
+rotrot_dat$surface <- rotate.matrix(x = rot_dat$surface, angle = -8, method = "bilinear")
+rotrot_dat$surface[rotrot_dat$surface == 0] <- NA
+
+
+p_o <- plot_profilm(data = original_dat, threeD = FALSE, tolerance = 5)
+p_r <- plot_profilm(data = rot_dat, threeD = FALSE, tolerance = 5)
+p_rr <- plot_profilm(data = rotrot_dat, threeD = FALSE, tolerance = 5)
+
+grid.arrange(p_o,p_r,p_rr, nrow = 1)
+
+# why are the colors different? check scale
+
+range(original_dat$surface)
+range(rotrot_dat$surface, na.rm = TRUE)
+
+```
+
+
