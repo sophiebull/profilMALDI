@@ -108,7 +108,7 @@ plot_profilm <- function(data, threeD = TRUE, tolerance = 6, palette = "inferno"
     p <- ggplot(z, aes(x = col_id, y = row_id, z = value, fill = value, label = value)) + 
       geom_tile() + 
       #geom_text(col = "black") + 
-      scale_fill_gradientn(colors = colorscale, values = c(0,1)) + 
+      scale_fill_gradientn(colors = colorscale, values = c(0, 1), limits = c(0, max(z$value)), na.value = "transparent") + 
       scale_y_continuous(trans = "reverse") + 
       theme(legend.position = "none",
             axis.title.x = element_blank(),
