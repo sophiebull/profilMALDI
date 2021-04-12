@@ -18,7 +18,8 @@ Depends: R (>= 3.5.0),
          dplyr,
          tidyr,
          reshape2,
-         gridExtra
+         gridExtra,
+         wvtool
          
 Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
