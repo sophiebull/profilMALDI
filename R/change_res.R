@@ -1,4 +1,4 @@
-##' Match resolution of Profilometry data to MALDI MSI data
+##' Match resolution of Profilometry data to MALDI MSI data (revise this to be more general)
 ##' 
 ##' A function to match the resolution of the raw profilometry data obtained from the ProFilm 3D Optical Profilometer to the raw mass spectral data from MALDI MSI data. 
 ##' 
