@@ -48,33 +48,7 @@ grid.arrange(p, p_resized, nrow = 1)
 ```
 
 
-### Try rotating data
-```{r}
-original_dat <- list()
-original_dat$surface <- volcano
-
-rot_dat <- list()
-rot_dat$surface <- rotate.matrix(x = volcano, angle = 8, method = "bilinear")
-
-rotrot_dat <- list()
-rotrot_dat$surface <- rotate.matrix(x = rot_dat$surface, angle = -8, method = "bilinear")
-rotrot_dat$surface[rotrot_dat$surface == 0] <- NA
-
-
-p_o <- plot_profilm(data = original_dat, threeD = FALSE, tolerance = 5)
-p_r <- plot_profilm(data = rot_dat, threeD = FALSE, tolerance = 5)
-p_rr <- plot_profilm(data = rotrot_dat, threeD = FALSE, tolerance = 5)
-
-grid.arrange(p_o,p_r,p_rr, nrow = 1)
-
-# why are the colors different? check scale
-
-range(original_dat$surface)
-range(rotrot_dat$surface, na.rm = TRUE)
-
-```
-
-### test rotation algorithm
+### Create Example Standard (lower Right)
 ```{r}
 
 squared <- matrix(rep(0,1000), nrow = 100, ncol = 100)
@@ -87,116 +61,6 @@ for(i in 80:100){
 for(j in 80:100){
   squared[, j] <- sample(thick, size = 100)
 }
-
-
-standard_thickness <- 5
-tolerance <- 1
-
-upper <- standard_thickness + tolerance
-lower <- standard_thickness - tolerance
-
-ncol = 100
-nrow = 100
-
-# Identify row and column where first zero appears
-
-if(standard_pos == "upperLeft"){
-    col_id <- 1
-    sign_c <- 1
-    
-    row_id <- 1
-    sign_r = 1
-  }
-
-if(standard_pos == "upperRight"){
-    col_id <- ncol
-    sign_c <- -1
-    
-    row_id <- 1
-    sign_r <- 1
-    } 
-
-if(standard_pos == "lowerLeft"){
-    col_id <- 1
-    sign_c <- 1
-    
-    row_id <- nrow
-    sign_r <- -1
-  }
-
-if(standard_pos == "lowerRight"){
-    col_id <- ncol
-    sign_c = -1
-    
-    row_id <- nrow
-    sign_r = -1
-  }
-
-pos <- squared[row_id, col_id]
-
-while(pos != 0){
-
-  row_id <- row_id + sign_r*1
-  col_id <- col_id + sign_c*1
-    
-  pos <- squared[row_id, col_id]
-
-}
-
-# Find mean of the standard row and column
-# Rotate until mean(row) and mean(col) are both in the acceptable thickness range
-
-m_r <- mean(squared[row_id + -sign_r*1, ])
-m_c <- mean(squared[, col_id + -sign_c*1])
-
-# Create rotated matrix out of squared
-rotated <- rotate.matrix(x = squared, angle = 5, method = "bilinear")
-
-# Trim edges
-rotated <- rotated[10:90, 10:90]
-
-m_r <- mean(rotated[row_id + -sign_r*1, ])
-m_c <- mean(rotated[, col_id + -sign_c*1])
-
-((m_r >= lower & m_r <= upper) & (m_c >= lower & m_c <= upper))
-
-rot_deg <- 0 # might also need to rotate counter clockwise
-
-# check that if rotated backward 5 degrees you get the same
-# rott <- rotate.matrix(rotated, angle = -5, method = "bilinear")
-# m_r <- mean(rott[row_id + -sign_r*1, ])
-# m_c <- mean(rott[, col_id + -sign_c*1])
-
-# ((m_r >= lower & m_r <= upper) & (m_c >= lower & m_c <= upper))
-
-# Check! 
-
-while(!((m_r >= lower & m_r <= upper) & (m_c >= lower & m_c <= upper))){
-  
-  rot <- rotate.matrix(rotated, angle = rot_deg, method = "bilinear")
-  
-  m_r <- mean(rot[row_id + -sign_r*1, ])
-  m_c <- mean(rot[, col_id + -sign_c*1])
-  
-  ((m_r >= lower & m_r <= upper) & (m_c >= lower & m_c <= upper))
-  
-  rot_deg <- rot_deg -1
-}
-
-
-squared_list <- list()
-rotated_list <- list()
-corrected_list <- list()
-
-squared_list$surface <- squared
-rotated_list$surface <- rotated
-corrected_list$surface <- rot
-
-p_s <- plot_profilm(data = squared_list, threeD = FALSE, palette = 'matlab_like')
-p_r <- plot_profilm(data = rotated_list, threeD = FALSE, palette = 'matlab_like')
-p_c <- plot_profilm(data = corrected_list, threeD = FALSE, palette = 'matlab_like')
-
-grid.arrange(p_s,p_r,p_c, nrow = 1)
 
 ## Need to use pixel_size to scale properly. Rotation affects number of pixels and cant figure out algorithm for this. Try padding the matrix first and then rotating to see if it changes the scale of the important stuff
 ```
@@ -257,11 +121,11 @@ for(j in 80:100){
 }
 
 
-r1 <- rotate.matrix(x = squared, angle = -2, method = "bilinear")
-r2 <- rotate.matrix(x = squared, angle = -3, method = "bilinear")
-r3 <- rotate.matrix(x = squared, angle = -4, method = "bilinear")
-r4 <- rotate.matrix(x = squared, angle = -5, method = "bilinear")
-r5 <- rotate.matrix(x = squared, angle = -6, method = "bilinear")
+r1 <- rotate.matrix(x = squared, angle = 2, method = "bilinear")
+r2 <- rotate.matrix(x = squared, angle = 3, method = "bilinear")
+r3 <- rotate.matrix(x = squared, angle = 4, method = "bilinear")
+r4 <- rotate.matrix(x = squared, angle = 5, method = "bilinear")
+r5 <- rotate.matrix(x = squared, angle = 6, method = "bilinear")
 
 r_list <- vector(mode = "list", length =5)
 
@@ -449,7 +313,7 @@ t4 <- trace(squared4, standard_pos = "lowerLeft")
 standard_thickness = 5.5
 tolerance = 0.5
 standard_pos <- "lowerRight"
-direction = "clockwise"
+clockwise = FALSE
 
 # Should be 2
 
@@ -457,7 +321,7 @@ pr1 <- rotate(x = padded_list[[1]],
               standard_thickness = standard_thickness, 
               tolerance = tolerance, 
               standard_pos = standard_pos, 
-              direction = direction)
+              clockwise = clockwise)
 pr1$rot_deg
 pr1$rot_deg == 2
 
@@ -468,7 +332,7 @@ pr2 <- rotate(x = padded_list[[2]],
               standard_thickness = standard_thickness, 
               tolerance = tolerance, 
               standard_pos = standard_pos, 
-              direction = direction)
+              clockwise = clockwise)
 pr2$rot_deg
 pr2$rot_deg == 3
 
@@ -479,7 +343,7 @@ pr3 <- rotate(x = padded_list[[3]],
               standard_thickness = standard_thickness, 
               tolerance = tolerance, 
               standard_pos = standard_pos, 
-              direction = direction)
+              clockwise = clockwise)
 pr3$rot_deg
 pr3$rot_deg == 4
 
@@ -489,7 +353,7 @@ pr4 <- rotate(x = padded_list[[4]],
               standard_thickness = standard_thickness, 
               tolerance = tolerance, 
               standard_pos = standard_pos, 
-              direction = direction)
+              clockwise = clockwise)
 pr4$rot_deg # WHY IS THIS ZERO
 pr4$rot_deg == 5 
   
@@ -499,7 +363,7 @@ pr5 <- rotate(x = padded_list[[5]],
               standard_thickness = standard_thickness, 
               tolerance = tolerance, 
               standard_pos = standard_pos, 
-              direction = direction)
+              clockwise = clockwise)
 pr5$rot_deg
 pr5$rot_deg == 6
 
@@ -518,3 +382,94 @@ prp5 <- plot_profilm(data = pr5$matrix, threeD = FALSE, palette = "matlab_like")
 grid.arrange(p1,p2,p3,p4,p5, nrow = 1)
 grid.arrange(prp1, prp2, prp3, prp4, prp5, nrow = 1)
 ```
+
+# Try trace algorithm
+
+```{r}
+
+r1c <- rotate.matrix(x = squared1, angle = -3) # lower right, need clockwise
+r1cc <- rotate.matrix(x = squared1, angle = 3) # lower right, need counterclockwise
+
+r2c <- rotate.matrix(x = squared2, angle = -3) # upper right, need clockwise
+r2cc <- rotate.matrix(x = squared2, angle = 3) # upper right, need counterclockwise
+
+r3c <- rotate.matrix(x = squared3, angle = -3) # upper left, need clockwise
+r3cc <- rotate.matrix(x = squared3, angle = 3) # upper left, need counterclockwise
+
+r4c <- rotate.matrix(x = squared4, angle = -3) # lower left, need clockwise
+r4cc <- rotate.matrix(x = squared4, angle = 3) # lower left, need counterclockwise
+
+r1 <- plot_profilm(data = r1c, threeD = FALSE)
+r2 <- plot_profilm(data = r1cc, threeD = FALSE)
+r3 <- plot_profilm(data = r2c, threeD = FALSE)
+r4 <- plot_profilm(data = r2cc, threeD = FALSE)
+r5 <- plot_profilm(data = r3c, threeD = FALSE)
+r6 <- plot_profilm(data = r3cc, threeD = FALSE)
+r7 <- plot_profilm(data = r4c, threeD = FALSE)
+r8 <- plot_profilm(data = r4cc, threeD = FALSE)
+
+grid.arrange(r1,r2,r3,r4,r5,r6,r7,r8, ncol = 2)
+
+
+t1 <- trim(x = r1c, standard_pos = "lowerRight")
+t2 <- trim(x = r1cc, standard_pos = "lowerRight")
+t3 <- trim(x = r2c, standard_pos = "upperRight")
+t4 <- trim(x = r2cc, standard_pos = "upperRight")
+t5 <- trim(x = r3c, standard_pos = "upperLeft")
+t6 <- trim(x = r3cc, standard_pos = "upperLeft")
+t7 <- trim(x = r4c, standard_pos = "lowerLeft")
+t8 <- trim(x = r4cc, standard_pos = "lowerLeft")
+
+pt1 <- plot_profilm(data = t1, threeD = FALSE)
+pt2 <- plot_profilm(data = t2, threeD = FALSE)
+pt3 <- plot_profilm(data = t3, threeD = FALSE)
+pt4 <- plot_profilm(data = t4, threeD = FALSE)
+pt5 <- plot_profilm(data = t5, threeD = FALSE)
+pt6 <- plot_profilm(data = t6, threeD = FALSE)
+pt7 <- plot_profilm(data = t7, threeD = FALSE)
+pt8 <- plot_profilm(data = t8, threeD = FALSE)
+
+grid.arrange(pt1,pt2,pt3,pt4,pt5,pt6,pt7,pt8, ncol = 2)
+
+
+
+```
+
+
+# Checking with pseudo-trim
+
+```{r}
+tr1 <- r1c[10:90,10:90]
+tr2 <- r1cc[10:90,10:90]
+tr3 <- r2c[10:90,10:90]
+tr4 <- r2cc[10:90,10:90]
+tr5 <- r3c[10:90,10:90]
+tr6 <- r3cc[10:90,10:90]
+tr7 <- r4c[10:90,10:90]
+tr8 <- r4cc[10:90,10:90]
+
+ptr1 <- plot_profilm(data = tr1, threeD = FALSE)
+ptr2 <- plot_profilm(data = tr2, threeD = FALSE)
+ptr3 <- plot_profilm(data = tr3, threeD = FALSE)
+ptr4 <- plot_profilm(data = tr4, threeD = FALSE)
+ptr5 <- plot_profilm(data = tr5, threeD = FALSE)
+ptr6 <- plot_profilm(data = tr6, threeD = FALSE)
+ptr7 <- plot_profilm(data = tr7, threeD = FALSE)
+ptr8 <- plot_profilm(data = tr8, threeD = FALSE)
+
+grid.arrange(ptr1,ptr2,ptr3,ptr4,ptr5,ptr6,ptr7,ptr8, ncol = 2)
+
+lrc <- trace(tr1, standard_pos = "lowerRight")
+lrcc <- trace(tr2, standard_pos = "lowerRight")
+urc <- trace(tr3, standard_pos = "upperRight")
+urcc <- trace(tr4, standard_pos = "upperRight")
+ulc <- trace(tr5, standard_pos = "upperLeft")
+ulcc <- trace(tr6, standard_pos = "upperLeft")
+llc <- trace(tr7, standard_pos = "lowerLeft")
+llcc <- trace(tr8, standard_pos = "lowerLeft")
+
+# Looks like its ok
+
+```
+
+# NOW JUST NEED TO IMPROVE TRIMMING ALGORITHM SO THAT THERE ARE SEAMLESS EDGES (NO BLUNT EDGES ZEROES)
