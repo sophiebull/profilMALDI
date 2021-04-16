@@ -33,12 +33,18 @@ data <- list()
 data$surface <- volcano
 
 
-z_resized <- change_res(data, xres = 60, yres = 80)
+z_resized <- change_res(data, xres = 20, yres = 20)
 
 data_resized <- list()
 data_resized$surface <- z_resized
 
-plot_profilm(data = data_resized, palette = 'inferno', threeD = FALSE, tolerance = 20, contour_col = "white")
+p <- plot_profilm(data = data, palette = 'matlab_like', threeD = FALSE, tolerance = 10, contour_col = "white")
+
+p_resized <- plot_profilm(data = data_resized, palette = 'matlab_like', threeD = FALSE, tolerance = 2, contour_col = "white")
+
+grid.arrange(p, p_resized, nrow = 1)
+
+
 ```
 
 
@@ -68,4 +74,447 @@ range(rotrot_dat$surface, na.rm = TRUE)
 
 ```
 
+### test rotation algorithm
+```{r}
 
+squared <- matrix(rep(0,1000), nrow = 100, ncol = 100)
+
+thick <- seq(5.0, 5.9, length.out = 100)
+
+for(i in 80:100){
+  squared[i, ] <- sample(thick, size = 100)
+}
+for(j in 80:100){
+  squared[, j] <- sample(thick, size = 100)
+}
+
+
+standard_thickness <- 5
+tolerance <- 1
+
+upper <- standard_thickness + tolerance
+lower <- standard_thickness - tolerance
+
+ncol = 100
+nrow = 100
+
+# Identify row and column where first zero appears
+
+if(standard_pos == "upperLeft"){
+    col_id <- 1
+    sign_c <- 1
+    
+    row_id <- 1
+    sign_r = 1
+  }
+
+if(standard_pos == "upperRight"){
+    col_id <- ncol
+    sign_c <- -1
+    
+    row_id <- 1
+    sign_r <- 1
+    } 
+
+if(standard_pos == "lowerLeft"){
+    col_id <- 1
+    sign_c <- 1
+    
+    row_id <- nrow
+    sign_r <- -1
+  }
+
+if(standard_pos == "lowerRight"){
+    col_id <- ncol
+    sign_c = -1
+    
+    row_id <- nrow
+    sign_r = -1
+  }
+
+pos <- squared[row_id, col_id]
+
+while(pos != 0){
+
+  row_id <- row_id + sign_r*1
+  col_id <- col_id + sign_c*1
+    
+  pos <- squared[row_id, col_id]
+
+}
+
+# Find mean of the standard row and column
+# Rotate until mean(row) and mean(col) are both in the acceptable thickness range
+
+m_r <- mean(squared[row_id + -sign_r*1, ])
+m_c <- mean(squared[, col_id + -sign_c*1])
+
+# Create rotated matrix out of squared
+rotated <- rotate.matrix(x = squared, angle = 5, method = "bilinear")
+
+# Trim edges
+rotated <- rotated[10:90, 10:90]
+
+m_r <- mean(rotated[row_id + -sign_r*1, ])
+m_c <- mean(rotated[, col_id + -sign_c*1])
+
+((m_r >= lower & m_r <= upper) & (m_c >= lower & m_c <= upper))
+
+rot_deg <- 0 # might also need to rotate counter clockwise
+
+# check that if rotated backward 5 degrees you get the same
+# rott <- rotate.matrix(rotated, angle = -5, method = "bilinear")
+# m_r <- mean(rott[row_id + -sign_r*1, ])
+# m_c <- mean(rott[, col_id + -sign_c*1])
+
+# ((m_r >= lower & m_r <= upper) & (m_c >= lower & m_c <= upper))
+
+# Check! 
+
+while(!((m_r >= lower & m_r <= upper) & (m_c >= lower & m_c <= upper))){
+  
+  rot <- rotate.matrix(rotated, angle = rot_deg, method = "bilinear")
+  
+  m_r <- mean(rot[row_id + -sign_r*1, ])
+  m_c <- mean(rot[, col_id + -sign_c*1])
+  
+  ((m_r >= lower & m_r <= upper) & (m_c >= lower & m_c <= upper))
+  
+  rot_deg <- rot_deg -1
+}
+
+
+squared_list <- list()
+rotated_list <- list()
+corrected_list <- list()
+
+squared_list$surface <- squared
+rotated_list$surface <- rotated
+corrected_list$surface <- rot
+
+p_s <- plot_profilm(data = squared_list, threeD = FALSE, palette = 'matlab_like')
+p_r <- plot_profilm(data = rotated_list, threeD = FALSE, palette = 'matlab_like')
+p_c <- plot_profilm(data = corrected_list, threeD = FALSE, palette = 'matlab_like')
+
+grid.arrange(p_s,p_r,p_c, nrow = 1)
+
+## Need to use pixel_size to scale properly. Rotation affects number of pixels and cant figure out algorithm for this. Try padding the matrix first and then rotating to see if it changes the scale of the important stuff
+```
+
+
+```{r}
+# Original
+test_mat <- matrix(1:2000, nrow = 100, ncol = 200)
+
+# Start by padding matrix
+scale_mat <- scale(x = test_mat, scale.row = 200, scale.col = 200)
+
+# Then rotate
+rot_mat <- rotate.matrix(x = scale_mat, angle = -4, method = "bilinear")
+
+# Put in list to plot
+rot_list <- list()
+scale_list <- list()
+
+rot_list$surface <- rot_mat
+scale_list$surface <- scale_mat
+
+p1 <- plot_profilm(data = scale_list, threeD = FALSE)
+p2 <- plot_profilm(data = rot_list, threeD = FALSE)
+
+grid.arrange(p1,p2, nrow = 1)
+
+# Determine how much larger the rotated matrix became relative to the padded matrix
+
+adj <- (dim(scale_mat)/dim(rot_mat))*100 # adjustment factors
+names(adj) <- c("r.factor", "c.factor")
+adj <- round(adj)
+
+# Rescale rotated matrix to match padded original
+
+t_list <- list()
+
+t_list$surface <- scale(x = rot_mat, scale.row = adj["r.factor"] , scale.col = adj["c.factor"])
+
+p3 <- plot_profilm(data = t_list, threeD = FALSE)
+
+grid.arrange(p1,p2,p3,  nrow = 1)
+
+
+```
+ 
+# Create rotated text files
+```{r}
+squared <- matrix(rep(0,1000), nrow = 100, ncol = 100)
+
+thick <- seq(5.0, 5.9, length.out = 100)
+
+for(i in 80:100){
+  squared[i, ] <- sample(thick, size = 100)
+}
+for(j in 80:100){
+  squared[, j] <- sample(thick, size = 100)
+}
+
+
+r1 <- rotate.matrix(x = squared, angle = -2, method = "bilinear")
+r2 <- rotate.matrix(x = squared, angle = -3, method = "bilinear")
+r3 <- rotate.matrix(x = squared, angle = -4, method = "bilinear")
+r4 <- rotate.matrix(x = squared, angle = -5, method = "bilinear")
+r5 <- rotate.matrix(x = squared, angle = -6, method = "bilinear")
+
+r_list <- vector(mode = "list", length =5)
+
+r_list[[1]]$surface <- r1[1:100, 1:100]
+r_list[[2]]$surface <- r2[1:100, 1:100]
+r_list[[3]]$surface <- r3[1:100, 1:100]
+r_list[[4]]$surface <- r4[1:100, 1:100]
+r_list[[5]]$surface <- r5[1:100, 1:100]
+
+p1 <- plot_profilm(data = r_list[[1]]$surface, threeD = FALSE)
+p2 <- plot_profilm(data = r_list[[2]]$surface, threeD = FALSE)
+p3 <- plot_profilm(data = r_list[[3]]$surface, threeD = FALSE)
+p4 <- plot_profilm(data = r_list[[4]]$surface, threeD = FALSE)
+p5 <- plot_profilm(data = r_list[[5]]$surface, threeD = FALSE)
+
+grid.arrange(p1,p2,p3,p4,p5, nrow = 1)
+
+```
+
+# Checking conforming data size
+```{r}
+dims <- list()
+  
+dims <- lapply(r_list, FUN = function(x) dim(x$surface))
+  
+logic_dims <- 
+if(length(unique(dims)) != 1){
+  stop("Data set ______ has non-conforming dimension. Adjusting size:")
+}
+```
+
+
+# Increasing padding 
+
+```{r}
+# Just increase padding by a lot (nothing specific)
+scale.row = 200
+scale.col = 200
+  
+padded_list <- lapply(r_list, FUN = function(x){
+  scale(x = x$surface, scale.row = scale.row, scale.col = scale.col)
+})
+  
+# determine dimensions
+  
+dim_padded_list <- lapply(padded_list, FUN = function(x){
+  dims <- dim(x)
+  names(dims) <- c("rows","columns")
+    return(dims)
+})
+
+p1 <- plot_profilm(data = padded_list[[1]], threeD = FALSE)
+p2 <- plot_profilm(data = padded_list[[2]], threeD = FALSE)
+p3 <- plot_profilm(data = padded_list[[3]], threeD = FALSE)
+p4 <- plot_profilm(data = padded_list[[4]], threeD = FALSE)
+p5 <- plot_profilm(data = padded_list[[5]], threeD = FALSE)
+
+grid.arrange(p1,p2,p3,p4,p5, nrow = 1)
+
+```
+
+# Performing rotation
+
+```{r}
+# perform rotation correction, save in a list
+  
+standard_thickness = 5.5
+tolerance = 0.5
+standard_pos <- "lowerRight"
+
+rotated_list <- lapply(padded_list, FUN = function(x){
+  rotate(x = x, standard_thickness = standard_thickness, tolerance = tolerance, standard_pos = standard_pos)
+  })
+  
+# determine dimensions
+  
+dim_rotated_list <- lapply(rotated_list, FUN = function(x){
+  dims <- dim(x)
+  names(dims) <- c("rows","columns")
+  return(dims)
+})
+  
+# determine scale factors
+adj_list <- mapply("/", dim_padded_list, dim_rotated_list, SIMPLIFY = FALSE)
+
+adj_list <- lapply(adj_list, FUN = function(x){
+  adjs <- round(x*100)
+  names(adjs) <- c("r.factor", "c.factor")
+  return(adjs)
+})
+
+p1 <- plot_profilm(data = rotated_list[[1]], threeD = FALSE)
+p2 <- plot_profilm(data = rotated_list[[2]], threeD = FALSE)
+p3 <- plot_profilm(data = rotated_list[[3]], threeD = FALSE)
+p4 <- plot_profilm(data = rotated_list[[4]], threeD = FALSE)
+p5 <- plot_profilm(data = rotated_list[[5]], threeD = FALSE)
+
+grid.arrange(p1,p2,p3,p4,p5, nrow = 1)
+
+```
+
+# Maybe instead rotate until there are no zeroes in the row and column
+# But this means angles have to be very precise
+# So do a group
+
+# Or until the first and last element in the row both contain nonzero elements
+
+# Or until we have the last entire row of zeroes 
+# As soon as the sum of the row is not zero
+
+
+
+
+#Check trace algorithm
+```{r}
+# lower Right
+squared1 <- matrix(rep(0,1000), nrow = 100, ncol = 100)
+
+thick <- seq(5.0, 5.9, length.out = 100)
+
+for(i in 80:100){
+  squared1[i, ] <- sample(thick, size = 100)
+}
+for(j in 80:100){
+  squared1[, j] <- sample(thick, size = 100)
+}
+
+
+# Upper right
+squared2 <- matrix(rep(0,1000), nrow = 100, ncol = 100)
+
+thick <- seq(5.0, 5.9, length.out = 100)
+
+for(i in 1:20){
+  squared2[i, ] <- sample(thick, size = 100)
+}
+for(j in 80:100){
+  squared2[, j] <- sample(thick, size = 100)
+}
+
+# Upper Left
+squared3 <- matrix(rep(0,1000), nrow = 100, ncol = 100)
+
+thick <- seq(5.0, 5.9, length.out = 100)
+
+for(j in 1:20){
+  squared3[, j] <- sample(thick, size = 100)
+}
+
+for(i in 1:20){
+  squared3[i, ] <- sample(thick, size = 100)
+}
+
+
+
+# Lower Left
+squared4 <- matrix(rep(0,1000), nrow = 100, ncol = 100)
+
+thick <- seq(5.0, 5.9, length.out = 100)
+
+for(i in 80:100){
+  squared4[i, ] <- sample(thick, size = 100)
+}
+for(j in 1:20){
+  squared4[, j] <- sample(thick, size = 100)
+}
+
+
+s1 <- plot_profilm(data = squared1, threeD = FALSE)
+s2 <- plot_profilm(data = squared2, threeD = FALSE)
+s3 <- plot_profilm(data = squared3, threeD = FALSE)
+s4 <- plot_profilm(data = squared4, threeD = FALSE)
+
+grid.arrange(s1,s2,s3,s4, nrow  =1)
+
+t1 <- trace(squared1, standard_pos = "lowerRight")
+t2 <- trace(squared2, standard_pos = "upperRight")
+t3 <- trace(squared3, standard_pos = "upperLeft")
+t4 <- trace(squared4, standard_pos = "lowerLeft")
+
+```
+
+# Check rotation algorithm
+```{r}
+standard_thickness = 5.5
+tolerance = 0.5
+standard_pos <- "lowerRight"
+direction = "clockwise"
+
+# Should be 2
+
+pr1 <- rotate(x = padded_list[[1]], 
+              standard_thickness = standard_thickness, 
+              tolerance = tolerance, 
+              standard_pos = standard_pos, 
+              direction = direction)
+pr1$rot_deg
+pr1$rot_deg == 2
+
+
+# 3
+
+pr2 <- rotate(x = padded_list[[2]], 
+              standard_thickness = standard_thickness, 
+              tolerance = tolerance, 
+              standard_pos = standard_pos, 
+              direction = direction)
+pr2$rot_deg
+pr2$rot_deg == 3
+
+
+# 4 
+
+pr3 <- rotate(x = padded_list[[3]], 
+              standard_thickness = standard_thickness, 
+              tolerance = tolerance, 
+              standard_pos = standard_pos, 
+              direction = direction)
+pr3$rot_deg
+pr3$rot_deg == 4
+
+# 5
+
+pr4 <- rotate(x = padded_list[[4]], 
+              standard_thickness = standard_thickness, 
+              tolerance = tolerance, 
+              standard_pos = standard_pos, 
+              direction = direction)
+pr4$rot_deg # WHY IS THIS ZERO
+pr4$rot_deg == 5 
+  
+# 6
+
+pr5 <- rotate(x = padded_list[[5]], 
+              standard_thickness = standard_thickness, 
+              tolerance = tolerance, 
+              standard_pos = standard_pos, 
+              direction = direction)
+pr5$rot_deg
+pr5$rot_deg == 6
+
+
+prp1 <- plot_profilm(data = pr1$matrix, threeD = FALSE, palette = "matlab_like")
+prp2 <- plot_profilm(data = pr2$matrix, threeD = FALSE, palette = "matlab_like")
+prp3 <- plot_profilm(data = pr3$matrix, threeD = FALSE, palette = "matlab_like")
+prp4 <- plot_profilm(data = pr4$matrix, threeD = FALSE, palette = "matlab_like")
+
+# THIS IS HAPPENING BECAUSE THE TRIMMING ALGORITHM NEEDS TO MAKE SURE THAT IT TRIMS RELATIVE TO THE INNER CORNER. SUCH THAT ALL BOUNDARIES OF THE STANDARD THAT ARE TOUCHING THE EDGE OF THE MATRIX ARE NON ZERO.
+
+# ALSO NEED TO PROGRAM THE ALGORITHM TO DETERMINE CLOCKWISE AND USE VERTICAL REFERENCE OR COUNTER CLOCKWISE AND USE HORIZONTAL REFERENCE. BASICALLY DETERMINE WHICH DIRECTION TO ROTATE
+
+prp5 <- plot_profilm(data = pr5$matrix, threeD = FALSE, palette = "matlab_like")
+
+grid.arrange(p1,p2,p3,p4,p5, nrow = 1)
+grid.arrange(prp1, prp2, prp3, prp4, prp5, nrow = 1)
+```
