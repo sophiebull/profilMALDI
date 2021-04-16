@@ -45,7 +45,7 @@ plot_profilm <- function(data, threeD = TRUE, tolerance = 6, palette = "inferno"
   # Extract colours from palette
   colorscale <- color_values(1:20, palette = palette)
 
-  z <- data$surface 
+  z <- data
   
   xres <- ncol(z)
   yres <- nrow(z)
@@ -115,7 +115,7 @@ plot_profilm <- function(data, threeD = TRUE, tolerance = 6, palette = "inferno"
             axis.title.y = element_blank(),
             axis.text.x = element_blank(),
             axis.text.y = element_blank()) + 
-      ggtitle(paste0("Field: (", xres, " x ", yres, ")")) + 
+      ggtitle(paste0("Field: (", yres, " x ", xres, ")")) + 
       geom_contour(aes(x = col_id, y = row_id, z = value), color = contour_col, bins = tolerance)
     
   }
