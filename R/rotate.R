@@ -1,4 +1,4 @@
-rotate <- function(x, standard_thickness, tolerance, standard_pos){
+rotate <- function(x, standard_thickness, tolerance, standard_pos, threshold){
   
   standard_positions <- c("upperLeft", "upperRight", "lowerLeft", "lowerRight")
   directions <- c("clockwise", "counterclockwise")
@@ -9,8 +9,8 @@ rotate <- function(x, standard_thickness, tolerance, standard_pos){
   
   # Determine acceptable threshold
   
-  upper <- standard_thickness + tolerance
-  lower <- standard_thickness - tolerance
+  upper <- standard_thickness + threshold
+  lower <- standard_thickness - threshold
   
   ncol <- ncol(x)
   nrow <- nrow(x)
@@ -48,6 +48,7 @@ rotate <- function(x, standard_thickness, tolerance, standard_pos){
   
   # Check alignment of vertical
   sum_col <- sum(x_trim[row_id:arow_id, col_id])
+
   
   # Threshold to accept alignment
   
@@ -74,7 +75,7 @@ rotate <- function(x, standard_thickness, tolerance, standard_pos){
   
   rot_deg <- 0
   
-  while(!(arm < 0.30*tot_lower)){ # inner arm contains less than 30% of thickness values
+  while(!(arm < tolerance*tot_lower)){ # inner arm contains less than 30% of thickness values
     
     # Increase degree of rotation by one
     

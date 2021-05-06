@@ -7,7 +7,7 @@ trim <- function(x, standard_pos = standard_pos){
     .sign_c <- 1
     
     .row_id <- 1
-    .nrow_id <- nrow(x)
+    .arow_id <- nrow(x)
     .sign_r <- 1
   }
   
@@ -70,7 +70,7 @@ trim <- function(x, standard_pos = standard_pos){
   
   row_remove_index <- .row_id:row_id 
   col_remove_index <- .col_id:col_id
-
+  
   trimmed <- x[-(row_remove_index), -(col_remove_index)]
   
   plot_profilm(data = trimmed, threeD = FALSE)
@@ -82,7 +82,7 @@ trim <- function(x, standard_pos = standard_pos){
   if(standard_pos == "upperLeft"){
     #scan down and to the right
     .acol_id <- ncol(trimmed)
-    .nrow_id <- nrow(trimmed)
+    .arow_id <- nrow(trimmed)
   }
   
   if(standard_pos == "upperRight"){
@@ -106,7 +106,7 @@ trim <- function(x, standard_pos = standard_pos){
   # Other row side
   
   arow_id <- .arow_id
-
+  
   ar_pos <- trimmed[arow_id, .col_id]
   
   while(ar_pos == 0){
@@ -133,7 +133,12 @@ trim <- function(x, standard_pos = standard_pos){
   
   trimmed <- trimmed[-(row_remove_index), -(col_remove_index)]
   
-  plot_profilm(data = trimmed, threeD = FALSE)
+  plot_profilm(data = trimmed)
   
-  return(trimmed) 
+  trimmed_list <- list()
+  trimmed_list$matrix <- trimmed 
+  trimmed_list$row_remove_index <- row_remove_index
+  trimmed_list$col_remove_index <- col_remove_index
+  
+  return(trimmed_list) 
 }
