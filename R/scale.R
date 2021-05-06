@@ -72,7 +72,7 @@ scale <- function(x, scale.row = 100, scale.col = 100){
   
   # Expand rows, Expand columns
   if(scale.row > 100 & scale.col > 100){
-    scale_mat[row_id_expand, col_id_expand] <- x # done
+    scale_mat[row_id_expand, col_id_expand] <- x 
   }
   
   # Expand rows, Preserve columns
