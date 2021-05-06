@@ -191,22 +191,19 @@ trace <- function(x, standard_pos){
     }
   }
   
+    indicator_mat <- matrix(rep(1, nrow(x)*ncol(x)), nrow = nrow(x))
+    indicator_mat[z_row_id,z_col_id] <- 10
+  
   in_list <- list()
   in_list$col_id <- z_col_id
   in_list$acol_id <- acol_id
   in_list$row_id <- z_row_id
   in_list$arow_id <- arow_id
   in_list$clockwise <- clockwise
+  in_list$indicator <- indicator_mat
   
 
   return(in_list)
   
 }
 
-# THIS ALGORITHM BREAKS WHEN YOU NEED TO ROTATE COUNTER CLOCKWISE.
-
-# Determine appropriate direction of rotation by searching for the first zero and checking
-# if it is in the lower half of the standard (assuming lowerRight). If not, then the direction
-# is counter clockwise.  Instead, go by rows
-
-# NEED TO TRIM APRIL 16 2021 BEFORE OFFICE HOUR DIDN"T GET TO IT
