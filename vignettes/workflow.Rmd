@@ -246,10 +246,10 @@ squared1 <- matrix(rep(0,1000), nrow = 100, ncol = 100)
 
 thick <- seq(5.0, 5.9, length.out = 100)
 
-for(i in 80:100){
+for(i in 70:100){
   squared1[i, ] <- sample(thick, size = 100)
 }
-for(j in 80:100){
+for(j in 70:100){
   squared1[, j] <- sample(thick, size = 100)
 }
 
@@ -472,4 +472,312 @@ llcc <- trace(tr8, standard_pos = "lowerLeft")
 
 ```
 
-# NOW JUST NEED TO IMPROVE TRIMMING ALGORITHM SO THAT THERE ARE SEAMLESS EDGES (NO BLUNT EDGES ZEROES)
+# NOW JUST NEED TO IMPROVE TRIMMING ALGORITHM SO THAT THERE ARE SEAMLESS EDGES (NO BLUNT EDGES ZEROES) (This shouldn't pose an issue experimentally)
+# From the top
+# Create sample data with external standards in each corner
+```{r}
+
+# lower Right
+squared1 <- matrix(rep(0,1000), nrow = 100, ncol = 100)
+
+thick <- seq(5.0, 5.9, length.out = 100)
+
+for(i in 80:100){
+  squared1[i, ] <- sample(thick, size = 100)
+}
+for(j in 80:100){
+  squared1[, j] <- sample(thick, size = 100)
+}
+
+
+# Upper right
+squared2 <- matrix(rep(0,1000), nrow = 100, ncol = 100)
+
+thick <- seq(5.0, 5.9, length.out = 100)
+
+for(i in 1:20){
+  squared2[i, ] <- sample(thick, size = 100)
+}
+for(j in 80:100){
+  squared2[, j] <- sample(thick, size = 100)
+}
+
+# Upper Left
+squared3 <- matrix(rep(0,1000), nrow = 100, ncol = 100)
+
+thick <- seq(5.0, 5.9, length.out = 100)
+
+for(j in 1:20){
+  squared3[, j] <- sample(thick, size = 100)
+}
+
+for(i in 1:20){
+  squared3[i, ] <- sample(thick, size = 100)
+}
+
+# Lower Left
+squared4 <- matrix(rep(0,1000), nrow = 100, ncol = 100)
+
+thick <- seq(5.0, 5.9, length.out = 100)
+
+for(i in 80:100){
+  squared4[i, ] <- sample(thick, size = 100)
+}
+for(j in 1:20){
+  squared4[, j] <- sample(thick, size = 100)
+}
+
+
+s1 <- plot_profilm(data = squared1, threeD = FALSE)
+s2 <- plot_profilm(data = squared2, threeD = FALSE)
+s3 <- plot_profilm(data = squared3, threeD = FALSE)
+s4 <- plot_profilm(data = squared4, threeD = FALSE)
+
+grid.arrange(s1,s2,s3,s4, nrow  =1)
+
+```
+
+# Perform all types of rotation to simulate actual data
+```{r}
+r1c <- rotate.matrix(x = squared1, angle = -3) # lower right, need clockwise
+r1cc <- rotate.matrix(x = squared1, angle = 3) # lower right, need counterclockwise
+
+r2c <- rotate.matrix(x = squared2, angle = -3) # upper right, need clockwise
+r2cc <- rotate.matrix(x = squared2, angle = 3) # upper right, need counterclockwise
+
+r3c <- rotate.matrix(x = squared3, angle = -3) # upper left, need clockwise
+r3cc <- rotate.matrix(x = squared3, angle = 3) # upper left, need counterclockwise
+
+r4c <- rotate.matrix(x = squared4, angle = -3) # lower left, need clockwise
+r4cc <- rotate.matrix(x = squared4, angle = 3) # lower left, need counterclockwise
+
+r1 <- plot_profilm(data = r1c, threeD = FALSE)
+r2 <- plot_profilm(data = r1cc, threeD = FALSE)
+r3 <- plot_profilm(data = r2c, threeD = FALSE)
+r4 <- plot_profilm(data = r2cc, threeD = FALSE)
+r5 <- plot_profilm(data = r3c, threeD = FALSE)
+r6 <- plot_profilm(data = r3cc, threeD = FALSE)
+r7 <- plot_profilm(data = r4c, threeD = FALSE)
+r8 <- plot_profilm(data = r4cc, threeD = FALSE)
+
+grid.arrange(r1,r2,r3,r4,r5,r6,r7,r8, ncol = 2)
+```
+
+# Perform manual trim 
+```{r}
+r1c <- r1c[10:90,10:90]
+r1cc <- r1cc[10:90, 10:90]
+r2c <- r2c[10:90,10:90]
+r2cc <- r2cc[10:90,10:90]
+r3c <- r3c[10:90,10:90]
+r3cc <- r3cc[10:90,10:90]
+r4c <- r4c[10:90,10:90]
+r4cc <- r4cc[10:90,10:90]
+
+r_list <- list(r1c,r1cc,r2c,r2cc,r3c,r3cc,r4c,r4cc)
+
+r1 <- plot_profilm(data = r1c, threeD = FALSE)
+r2 <- plot_profilm(data = r1cc, threeD = FALSE)
+r3 <- plot_profilm(data = r2c, threeD = FALSE)
+r4 <- plot_profilm(data = r2cc, threeD = FALSE)
+r5 <- plot_profilm(data = r3c, threeD = FALSE)
+r6 <- plot_profilm(data = r3cc, threeD = FALSE)
+r7 <- plot_profilm(data = r4c, threeD = FALSE)
+r8 <- plot_profilm(data = r4cc, threeD = FALSE)
+
+grid.arrange(r1,r2,r3,r4,r5,r6,r7,r8, ncol = 2)
+```
+
+# Increase padding to prepare for rotation
+```{r}
+
+# Just increase padding by a lot (nothing specific)
+scale.row = 200
+scale.col = 200
+  
+padded_list <- lapply(r_list, FUN = function(x){
+  scale(x = x, scale.row = scale.row, scale.col = scale.col)
+})
+  
+# determine dimensions
+  
+dim_padded_list <- lapply(padded_list, FUN = function(x){
+  dims <- dim(x)
+  names(dims) <- c("rows","columns")
+    return(dims)
+})
+
+p1 <- plot_profilm(data = padded_list[[1]], threeD = FALSE)
+p2 <- plot_profilm(data = padded_list[[2]], threeD = FALSE)
+p3 <- plot_profilm(data = padded_list[[3]], threeD = FALSE)
+p4 <- plot_profilm(data = padded_list[[4]], threeD = FALSE)
+p5 <- plot_profilm(data = padded_list[[5]], threeD = FALSE)
+p6 <- plot_profilm(data = padded_list[[6]], threeD = FALSE)
+p7 <- plot_profilm(data = padded_list[[7]], threeD = FALSE)
+p8 <- plot_profilm(data = padded_list[[8]], threeD = FALSE)
+
+grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8, ncol = 2)
+```
+
+# Try rotation algorithm
+```{r}
+
+tolerance = 0.5
+t1 <- rotate(x = padded_list[[1]], standard_thickness = standard_thickness, tolerance = tolerance, standard_pos = "lowerRight" )
+t2 <- rotate(x = padded_list[[2]], standard_thickness = standard_thickness, tolerance = tolerance, standard_pos = "lowerRight" )
+t3 <- rotate(x = padded_list[[3]], standard_thickness = standard_thickness, tolerance = tolerance, standard_pos = "upperRight" )
+t4 <- rotate(x = padded_list[[4]], standard_thickness = standard_thickness, tolerance = tolerance, standard_pos = "upperRight" )
+t5 <- rotate(x = padded_list[[5]], standard_thickness = standard_thickness, tolerance = tolerance, standard_pos = "upperLeft" )
+t6 <- rotate(x = padded_list[[6]], standard_thickness = standard_thickness, tolerance = tolerance, standard_pos = "upperLeft" )
+t7 <- rotate(x = padded_list[[7]], standard_thickness = standard_thickness, tolerance = tolerance, standard_pos = "lowerLeft" )
+t8 <- rotate(x = padded_list[[8]], standard_thickness = standard_thickness, tolerance = tolerance, standard_pos = "lowerLeft" )
+
+
+pt1 <- plot_profilm(data = t1$matrix, threeD = FALSE)
+pt2 <- plot_profilm(data = t2$matrix, threeD = FALSE)
+pt3 <- plot_profilm(data = t3$matrix, threeD = FALSE)
+pt4 <- plot_profilm(data = t4$matrix, threeD = FALSE)
+pt5 <- plot_profilm(data = t5$matrix, threeD = FALSE)
+pt6 <- plot_profilm(data = t6$matrix, threeD = FALSE)
+pt7 <- plot_profilm(data = t7$matrix, threeD = FALSE)
+pt8 <- plot_profilm(data = t8$matrix, threeD = FALSE)
+
+grid.arrange(pt1,pt2,pt3,pt4,pt5,pt6,pt7,pt8, ncol = 2)
+```
+
+# So some of them did not work. Why?
+# Check Trim algorithm
+
+```{r}
+tr1 <- trim(x = padded_list[[1]], standard_pos = "lowerRight")
+tr2 <- trim(x = padded_list[[2]], standard_pos = "lowerRight")
+tr3 <- trim(x = padded_list[[3]], standard_pos = "upperRight")
+tr4 <- trim(x = padded_list[[4]], standard_pos = "upperRight")
+tr5 <- trim(x = padded_list[[5]], standard_pos = "upperLeft")
+tr6 <- trim(x = padded_list[[6]], standard_pos = "upperLeft")
+tr7 <- trim(x = padded_list[[7]], standard_pos = "lowerLeft")
+tr8 <- trim(x = padded_list[[8]], standard_pos = "lowerLeft")
+
+
+ptr1 <- plot_profilm(data= tr1, threeD = FALSE)
+ptr2 <- plot_profilm(data= tr2, threeD = FALSE)
+ptr3 <- plot_profilm(data= tr3, threeD = FALSE)
+ptr4 <- plot_profilm(data= tr4, threeD = FALSE)
+ptr5 <- plot_profilm(data= tr5, threeD = FALSE)
+ptr6 <- plot_profilm(data= tr6, threeD = FALSE)
+ptr7 <- plot_profilm(data= tr7, threeD = FALSE)
+ptr8 <- plot_profilm(data= tr8, threeD = FALSE)
+
+grid.arrange(ptr1,ptr2,ptr3,ptr4,ptr5,ptr6,ptr7,ptr8, ncol = 2)
+
+```
+
+# So there is something wrong with the trimming algorithm.  Or perhaps the trace algorithm? What comes first?
+# The trim algorithm does not use trace(). So fix trim()
+# There was a slight typo!
+# Try rotation algorithm again
+# Still not working super well. I think it's because there are still zeroes at some edges after trim(). Check trace():
+
+```{r}
+trace1 <- trace(x = tr1, standard_pos = "lowerRight")
+trace2 <- trace(x = tr2, standard_pos = "lowerRight")
+trace3 <- trace(x = tr3, standard_pos = "upperRight")
+trace4 <- trace(x = tr4, standard_pos = "upperRight")
+trace5 <- trace(x = tr5, standard_pos = "upperLeft")
+trace6 <- trace(x = tr6, standard_pos = "upperLeft")
+trace7 <- trace(x = tr7, standard_pos = "lowerLeft")
+trace8 <- trace(x = tr8, standard_pos = "lowerLeft")
+
+print("lowerRight, need c")
+trace1
+print("lowerRight, need cc")
+trace2
+print("upperRight, need c")
+trace3
+print("upperRight, need cc")
+trace4
+print("upperLeft, need c")
+trace5
+print("upperLeft, need cc")
+trace6
+print("lowerLeft, need c")
+trace7
+print("lowerLeft, need cc")
+trace8
+
+```
+
+# Trace algorithm is fine.
+# Trim algorithm is fine. So what's going on? Must be the rotate one.
+
+# Who cares about the other external standard locations. 
+# Try with a bunch of different rotations
+
+```{r}
+
+c_ <- list()
+cc_ <- list()
+
+for(i in 1:10){
+  c_[[i]] <- rotate.matrix(x = squared1, angle = -i)
+  c_[[i]] <- c_[[i]][5:95,17:95] # trim off edges
+}
+
+for(i in 1:10){
+  cc_[[i]] <- rotate.matrix(x = squared1, angle = i)
+  cc_[[i]] <- cc_[[i]][17:95,5:95] # trim off edges
+}
+
+orig <- c(c_,cc_)
+
+orig_plot <- lapply(orig, FUN = function(x){ x <- plot_profilm(data = x)})
+do.call("grid.arrange", c(orig_plot, ncol = 10))
+
+
+```
+
+
+# Perform rotation
+```{r}
+tolerance = 0.9
+threshold = 0.8
+
+rot <- lapply(orig[1:8], FUN = function(x){
+  rotate(x, standard_thickness = standard_thickness, tolerance = tolerance, threshold = threshold, standard_pos = "lowerRight") 
+  })
+
+rot_plot <- lapply(rot, FUN = function(x){ x <- plot_profilm(data = x$matrix)})
+
+do.call("grid.arrange", c(rot_plot, ncol = 10))
+```
+
+# Plot orig vs. rotated
+
+```{r}
+
+degree_list <- lapply(rot, FUN = function(x){ x <- x$rot_deg})
+degrees <- unlist(degree_list)
+
+actual <- c(-1:-8,1:8)
+names(actual)[1:8] <- c("need_c")
+names(actual)[9:16] <- c("need_cc")
+
+error <- actual + degrees
+error
+# algorithm doesn't work as well for cc rotation
+```
+
+
+# Plot orig vs rotated
+```{r}
+do.call("grid.arrange", c(orig_plot, ncol = 8))
+```
+```{r}
+do.call("grid.arrange", c(rot_plot, ncol = 8))
+```
+
+
+# Need to fill edge-zeroes arising after rotation
+```{r}
+
+```
