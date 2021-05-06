@@ -25,7 +25,7 @@
 # Title: profilMALDI: Plot Profilometry Data
 # -----------------------------------------------------------------------
 
-plot_profilm <- function(data, threeD = TRUE, tolerance = 6, palette = "inferno", contour_col = "white"){
+plot_profilm <- function(data, threeD = FALSE, tolerance = 6, palette = "inferno", contour_col = "white"){
   
   palettes <- color_palettes()
   
@@ -115,8 +115,8 @@ plot_profilm <- function(data, threeD = TRUE, tolerance = 6, palette = "inferno"
             axis.title.y = element_blank(),
             axis.text.x = element_blank(),
             axis.text.y = element_blank()) + 
-      ggtitle(paste0("Field: (", yres, " x ", xres, ")")) + 
-      geom_contour(aes(x = col_id, y = row_id, z = value), color = contour_col, bins = tolerance)
+      ggtitle(paste0("Field: (", yres, " x ", xres, ")")) #+ 
+      #geom_contour(aes(x = col_id, y = row_id, z = value), color = contour_col, bins = tolerance)
     
   }
   
