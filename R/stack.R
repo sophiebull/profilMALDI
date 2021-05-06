@@ -88,17 +88,17 @@ stack <- function(dir, standard_pos = "lowerRight", standard_thickness, toleranc
   
   # Just increase padding by a lot (nothing specific)
   
-  padded_list <- lapply(data_list, FUN = function(x){
-    scale(x = x$surface, scale.row = scale.row, scale.col = scale.col)
-  })
+  #padded_list <- lapply(data_list, FUN = function(x){
+  #  scale(x = x$surface, scale.row = scale.row, scale.col = scale.col)
+  #})
   
   # determine dimensions
   
-  dim_padded_list <- lapply(padded_list, FUN = function(x){
-    dims <- dim(x)
-    names(dims) <- c("rows","columns")
-    return(dims)
-  })
+  #dim_padded_list <- lapply(padded_list, FUN = function(x){
+  #  dims <- dim(x)
+  #  names(dims) <- c("rows","columns")
+  #  return(dims)
+  #})
   
   
   ##################################
@@ -107,8 +107,8 @@ stack <- function(dir, standard_pos = "lowerRight", standard_thickness, toleranc
   
   # perform rotation correction, save in a list
   
-  rotated_list <- lapply(padded_list, FUN = function(x){
-    rotate(x = x, standard_thickness = standard_thickness, tolerance = tolerance, standard_pos = standard_pos)
+  rotated_list <- lapply(data_list, FUN = function(x){
+    rotate(x = x$surface, standard_thickness = standard_thickness, tolerance = tolerance, standard_pos = standard_pos)
     })
   
   # determine dimensions
@@ -120,26 +120,26 @@ stack <- function(dir, standard_pos = "lowerRight", standard_thickness, toleranc
   })
   
   # determine scale factors
-  adj_list <- mapply("/", dim_padded_list, dim_rotated_list, SIMPLIFY = FALSE)
+  # adj_list <- mapply("/", dim_padded_list, dim_rotated_list, SIMPLIFY = FALSE)
   
-  adj_list <- lapply(adj_list, FUN = function(x){
-    adjs <- round(x*100)
-    names(adjs) <- c("r.factor", "c.factor")
-    return(adjs)
-  })
+  # adj_list <- lapply(adj_list, FUN = function(x){
+  #  adjs <- round(x*100)
+  #  names(adjs) <- c("r.factor", "c.factor")
+  #  return(adjs)
+  # })
   
   #########################################
   # Remove Padding to match original scale
   #########################################
   
-  vec.scale.row <- lapply(adj_list, FUN = function(x){x["r.factor"]}) # vector of row scale adjustments
-  vec.scale.col <- lapply(adj_list, FUN = function(x){x["c.factor"]}) # vector of col scale adjustments 
+  # vec.scale.row <- lapply(adj_list, FUN = function(x){x["r.factor"]}) # vector of row scale adjustments
+  # vec.scale.col <- lapply(adj_list, FUN = function(x){x["c.factor"]}) # vector of col scale adjustments 
   
-  reverted_list <- list()
+  # reverted_list <- list()
   
-  for(i in 1:length(files)){
-    reverted_list[[i]] <- scale(x = rotated_list[[i]], scale.row = vec.scale.row[[i]], scale.col = vec.scale.col[[i]])  
-  }
+  # for(i in 1:length(files)){
+  #  reverted_list[[i]] <- scale(x = rotated_list[[i]], scale.row = vec.scale.row[[i]], scale.col = vec.scale.col[[i]])  
+  #}
 
 
   # cut out anything above the standard reference (beyond the zero boundary)
@@ -150,5 +150,5 @@ stack <- function(dir, standard_pos = "lowerRight", standard_thickness, toleranc
   # Trim ends
   
   # lateral translations
-  
+  return(rotated_list)
 }
